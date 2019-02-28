@@ -1,0 +1,17 @@
+{
+    "development":{
+      "username": "carlos",
+        "password": "12345",
+        "database": "recuperacion",
+        "host": "localhost",
+        "dialect": "mysql"
+    },
+    "staging":{
+         "username": "carlos",
+        "password": "12345",
+        "database": "recuperacion",
+        "host": "localhost",
+        "dialect": "mysql"
+    }
+  
+}

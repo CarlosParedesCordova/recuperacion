@@ -1,0 +1,70 @@
+
+<div class="row">
+    <div class="col-sm-4">
+        <form method="POST" action="/almacenar_cliente">
+            <input type="hidden" value="0" id="external" name="external">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input class="form-control"  name="nombre" id="nombre" placeholder="Nombre" style="color: black">
+                </div>
+                <div class="form-group">
+                    <label >Apellido</label>
+                    <input  class="form-control" name="apellido" id="apellido" placeholder="Apellido" style="color: black">
+                </div>
+                <div class="form-group">
+                    <label >Cedula</label>
+                    <input  name="cedula" placeholder="Cedula" id="cedula" class="form-control" style="color: black">
+                </div>
+                <div class="form-group">
+                    <label >Direccion</label>
+                    <input  name="direccion" placeholder="Direccion" id="direccion" class="form-control" style="color: black">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="form-control btn btn-primary">Guardar</button>
+                </div>
+        </form>
+    </div>
+    <div class="col-sm-8">
+
+        <table class="table table-striped table-dark " style="margin: 0 auto;">
+            <thead class="thead" style="background: blue;  ">
+                <tr>
+                    <th scope="col">Nro</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Apellido</th>
+                    <th scope="col">Direccion</th>
+                    <th scope="col">Cedula</th>
+
+                    <th scope="col">Aciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% cliente.forEach(function(cliente, i) { %>
+                <tr>
+                    <td><%= (i+1) %></td>
+                    <td><%= cliente.nombre %></td>
+                    <td><%= cliente.apellido %></td>
+                    <td><%= cliente.direccion %></td>
+                    <td><%= cliente.cedula %></td>
+
+                    <td>                       
+                        <a href="#" id="cliente<%= i%>" class="btn btn-primary" >Editar</a>                        
+                    </td>
+                </tr>
+                <script>
+                    $('#cliente<%= i%>').click(function () {
+                        $('#external').val('<%= cliente.external_id%>');
+                        $('#nombre').val('<%= cliente.nombre%>');
+                        $('#apellido').val('<%= cliente.apellido%>');
+                        $('#cedula').val('<%= cliente.cedula%>');
+                        $('#direccion').val('<%= cliente.direccion%>');
+                    });
+                </script>
+                <% }); %>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+

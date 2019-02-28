@@ -1,0 +1,258 @@
+
+<div class="row">
+  
+    <div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-1">Buscar</div>
+            <div class="col-sm-3">
+                <input type="date" id="buscar" class="form-control">
+            </div>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+Facturas
+</button>
+        </div>
+        <table class="table table-striped table-dark " style="margin: 0 auto;">
+            <thead class="thead-dark" style="background: blue;  ">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Cliente</th>
+                    <th scope="col">Clasificaion</th>
+                    <th scope="col">precio</th>
+                    <th scope="col">Accion</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          
+        <form method="POST" action="/factura/guardar">
+            <input type="hidden" value="0" id="external" name="external">
+                <div class="form-group">
+                    <label style="color:red">Fecha</label>
+                    <input type="date" class="form-control" name="fecha" id="fecha" >
+                </div>
+                <div class="form-group">
+                    <label style="color:red">Cliente</label>
+                    <select id="cliente" name="cliente" class="form-control" ></select>
+                </div>
+                <div class="form-group">
+                    <label style="color:red">Clasificacion de gastos</label>
+                    <select id="clas" name="clas" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label style="color:red">Precio</label>
+                    <input type="number" class="form-control"  id="precio" name="precio" ></input>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <a id="cancelar" class="btn " style="background: red;   font-size:10px" >Cancelar</a>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn" style="background: purple; font-size:10px;">Guardar</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <a href="/reporte" class="btn" style="background: purple;font-size:10px;
+                               font-family:Verdana,Helvetica;
+                               font-weight:bold;
+                               color:white;
+                               border:0px;
+                               width:80%;
+                               height:30px;" >Reporte</a>
+                        </div>
+                    </div>
+             
+        </form>
+    </div>
+          
+      </div>
+   
+    </div>
+  </div>
+</div>
+<script>
+    $(document).ready(function () {
+        Clasificacion();
+        Clientes();
+        llamarFactura();
+        $('#buscar').change(function () {
+            var fecha = $('#buscar').val();
+            if (fecha !== '') {
+                console.log('buscar ' + fecha);
+                FechaEncontrar(fecha);
+            } else {
+                llamarFactura();
+            }
+        });
+        $('#cancelar').click(function () {
+            $("#external").val("0");
+            $("#fecha").val("");
+            Clasificacion();
+            Clientes();
+            $("#precio").val("");
+        });
+    });
+    function FechaEncontrar(fecha) {
+        $.ajax({
+            url: '/factura_buscar/' + fecha,
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data, textStatus, jqXHR) {
+                llamarTabla(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+            }
+        });
+    }
+    function Clasificacion() {
+        $.ajax({
+            url: '/clasificacion',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data, textStatus, jqXHR) {
+                var html = "";
+                $.each(data.clasificacion, function (i, item) {
+                    html += '<option value="' + item + '">' + item + '</option>';
+                });
+                $("#clas").html(html);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+            }
+        });
+    }
+    function llamarFactura() {
+        $.ajax({
+            url: '/lista_factura',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data, textStatus, jqXHR) {
+                llamarTabla(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+            }
+        });
+    }
+    function llamarFacturaCliente(external) {
+        $.ajax({
+            url: '/factura_cliente/' + external,
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data, textStatus, jqXHR) {
+                var html = "";
+                var TotalPrecio = 0;
+                $.each(data, function (i, item) {
+                    html += '<tr>';
+                    html += '<td>' + (i + 1) + '</td>';
+                    html += ' <td>' + item.fecha + '</td>';
+                    html += '<td>' + item.cliente.nombre + ' ' + item.cliente.apellido + '</td>';
+                    html += '<td>' + item.clasificacion + '</td>';
+                    html += '<td>$ ' + item.precio + '</td>';
+                    html += '<td><a href="#" id="' + i + '" class="btn btn-secondary" >Editar</a> </td>';
+                    html += '<script>';
+                    html += '$("#' + i + '").click(function () {';
+                    html += '$("#external").val("' + item.external_id + '");';
+                    html += '$("#fecha").val("' + item.fecha + '");';
+                    html += '$("#cliente").val("' + item.id_cliente + '");';
+                    html += '$("#clas").val("' + item.clasificacion + '");';
+                    html += '$("#precio").val("' + item.precio + '");';
+                    html += '});';
+                    html += '</scrip' + 't>';
+                    if (item.clasificacion !== 'Otros') {
+                        TotalPrecio += item.precio;
+                    }
+                });
+                html += '<tr><td></td><td></td><td></td><td><b>TOTAL:</b></td><td><b>$ ' + TotalPrecio.toFixed(2) + '</b></td>';
+                html += '<td><a href="#" class="btn btn-outline-danger" onclick="cargarFactura()"><b>Regresar</b></a> </td></tr>';
+                html += '</tr>';
+                if (data.length === 0) {
+                    html = 'No hay registros';
+                }
+                $("tbody").html(html);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+            }
+        });
+    }
+    function llamarTabla(data) {
+        var html = "";
+        var precioTotal = 0;
+        $.each(data, function (i, item) {
+            
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            html += ' <td>' + item.fecha + '</td>';
+            html += '<td>' + item.cliente.nombre + ' ' + item.cliente.apellido + '</td>';
+            html += '<td>' + item.clasificacion + '</td>';
+            html += '<td>$ ' + item.precio + '</td>';
+            html += '<td><a href="#" id="' + i + '" class="btn btn-outline-warning" data-toggle="modal" data-target="#exampleModal">Editar</a>';
+            html += '<a href="#" class="btn btn-outline-danger" onclick="llamarFacturaCliente(' + "'" + item.cliente.external_id + "'" + ')">Ver Gastos</a>';
+            html += '<a href="/reporte/' + item.cliente.external_id + '" class="btn btn-outline-info">Reporte</a> </td>';
+            html += '<script>';
+            html += '$("#' + i + '").click(function () {';
+            html += '$("#external").val("' + item.external_id + '");';
+            html += '$("#fecha").val("' + item.fecha + '");';
+            html += '$("#cliente").val("' + item.id_cliente + '");';
+            html += '$("#clas").val("' + item.clasificacion + '");';
+            html += '$("#precio").val("' + item.precio + '");';
+            html += '});';
+            html += '</scrip' + 't>';
+            if (item.clasificacion !== 'Otros') {
+                precioTotal += item.precio;
+            }
+        });
+        html += '<tr><td></td><td></td><td></td><td><b>TOTAL:</b></td><td><b>$ ' + precioTotal.toFixed(2) + '</b></td></td><td></tr>';
+        html += '</tr>';
+        if (data.length === 0) {
+            html = 'No hay registros';
+        }
+        $("tbody").html(html);
+    }
+    function verificaCliente(data, id) {
+        var veri = true;
+        $.each(data, function (i, item) {
+            if (item.cliente.id === id) {
+                veri = false;
+
+                console.log(item.cliente.id + ' ===  ' + id);
+            }
+        });
+        return veri;
+    }
+
+    function Clientes() {
+        $.ajax({
+            url: '/lista_cliente',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data, textStatus, jqXHR) {
+                var html = "";
+                $.each(data, function (i, item) {
+                    html += '<option value="' + item.id + '">' + item.nombre + ' ' + item.apellido + '</option>';
+                });
+                $("#cliente").html(html);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+            }
+        });
+    }
+</script>
